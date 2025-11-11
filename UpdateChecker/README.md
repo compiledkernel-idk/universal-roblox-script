@@ -4,14 +4,6 @@ A professional Windows application that automatically checks for updates to the 
 
 ## Features
 
-✨ **Automatic Update Detection** - Checks GitHub releases for the latest version
-📊 **Real-time Progress Bar** - Visual feedback during download and installation
-🔄 **Automatic Backup** - Creates backup of current script before updating
-📝 **Detailed Logging** - Shows all operations in real-time
-🎨 **Modern GUI** - Clean, professional Windows interface
-⚡ **Fast & Reliable** - Efficient download with progress tracking
-
-## Screenshots
 
 The updater features:
 - Large, easy-to-read version display
