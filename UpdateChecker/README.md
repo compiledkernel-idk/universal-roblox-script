@@ -1,117 +1,174 @@
-# Roblox Script Auto Updater
+# Roblox Script Update Checker (Console Version)
 
-A professional Windows application that automatically checks for updates to the Universal Roblox Script and installs them with a beautiful progress bar interface.
+A fast, lightweight command-line tool that automatically checks for updates to the Universal Roblox Script and installs them with a beautiful console progress bar interface.
 
 ## Features
 
-
-The updater features:
-- Large, easy-to-read version display
-- Real-time status updates
-- Progress bar showing download/install progress
-- Detailed log window showing all operations
-- Modern flat design with blue accents
+- Command-line interface (CMD/Terminal)
+- Colored console output with status indicators
+- Real-time download progress bar
+- Automatic version detection from GitHub releases
+- Automatic backup creation before updates
+- Detailed logging of all operations
+- Small, portable executable
 
 ## Requirements
 
-- Windows 10/11
-- .NET 6.0 Runtime or SDK
+- Windows 10/11 (for .exe)
+- .NET 6.0 Runtime (or use self-contained build)
 - Internet connection for update checks
 
 ## Building the Executable
 
-### Option 1: Using Visual Studio 2022
+### Quick Build (Recommended)
 
-1. Open `UpdateChecker.csproj` in Visual Studio 2022
-2. Select **Release** configuration
-3. Right-click project → **Publish**
-4. Choose **Folder** publish target
-5. Click **Publish**
-6. Find the .exe in `bin/Release/net6.0-windows/publish/`
-
-### Option 2: Using .NET CLI (Command Line)
-
+**Windows:**
 ```bash
-# Navigate to UpdateChecker directory
 cd UpdateChecker
-
-# Restore dependencies
-dotnet restore
-
-# Build Release version
-dotnet build -c Release
-
-# Publish as self-contained executable (includes .NET runtime)
-dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
-
-# The executable will be in: bin/Release/net6.0-windows/win-x64/publish/RobloxScriptUpdater.exe
+build.bat
 ```
 
-### Option 3: Framework-Dependent Build (smaller file size)
+**Linux/Mac:**
+```bash
+cd UpdateChecker
+chmod +x build.sh
+./build.sh
+```
+
+The executable will be created at: `bin/Release/net6.0/win-x64/publish/UpdateChecker.exe`
+
+### Manual Build Options
+
+#### Option 1: Self-Contained (includes .NET runtime)
 
 ```bash
-# Publish framework-dependent (requires .NET 6.0 installed on target machine)
-dotnet publish -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true
+cd UpdateChecker
+dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+```
 
-# Output: bin/Release/net6.0-windows/win-x64/publish/RobloxScriptUpdater.exe
+Output: `bin/Release/net6.0/win-x64/publish/UpdateChecker.exe`
+
+#### Option 2: Framework-Dependent (smaller, requires .NET 6.0)
+
+```bash
+dotnet publish -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true
 ```
 
 ## Usage
 
-### Running the Updater
+### Basic Usage
 
-1. **Simple Usage** (place in same folder as script):
-   ```
-   RobloxScriptUpdater.exe
-   ```
+Place `UpdateChecker.exe` in the same folder as your `kernelscript.luau` file and run:
 
-2. **Custom Script Path** (command line argument):
-   ```
-   RobloxScriptUpdater.exe "C:\Path\To\Your\Script.lua"
-   ```
+```cmd
+UpdateChecker.exe
+```
 
-3. **GUI Instructions**:
-   - Click "Check for Updates" button
-   - If update available, click "Yes" to download
-   - Progress bar shows download and installation progress
-   - Backup is automatically created
-   - Script is updated automatically
+### Custom Script Path
+
+Specify a different script file:
+
+```cmd
+UpdateChecker.exe "C:\Path\To\YourScript.luau"
+```
+
+### Example Output
+
+```
+╔════════════════════════════════════════════════╗
+║   Universal Roblox Script - Update Checker   ║
+╚════════════════════════════════════════════════╝
+
+[INFO] Script found: kernelscript.luau
+[INFO] Current version: 1.0.0
+
+[INFO] Checking for updates...
+[INFO] Latest release: 1.1.0
+
+[UPDATE AVAILABLE]
+  Current version: 1.0.0
+  Latest version:  1.1.0
+
+Do you want to download and install the update? (Y/n): y
+
+[DOWNLOAD] Downloading update...
+  Progress: [██████████████████████████████████████████████████] 100%
+  Downloaded to: C:\Temp\script_update.luau
+
+[INSTALL] Installing update...
+  ✓ Created backup: kernelscript.luau.backup
+  ✓ Updated script: kernelscript.luau
+  ✓ Cleaned up temporary files
+
+✓ Update completed successfully!
+  Updated to version 1.1.0
+```
 
 ## How It Works
 
 1. **Version Detection**
-   - Reads VERSION variable from local Lua script
+   - Reads VERSION variable from your local Lua script
+   - Example: `local VERSION = "1.0.0"`
    - Queries GitHub API for latest release
-   - Falls back to main branch if no releases exist
 
 2. **Update Check**
    - Compares local version with latest GitHub version
-   - Notifies user if update is available
+   - Falls back to main branch if no releases exist
+   - Uses semantic versioning for comparison
 
 3. **Download**
    - Downloads latest script from GitHub releases
-   - Shows real-time progress in progress bar
+   - Shows real-time progress bar with download status
    - Saves to temporary location
 
 4. **Installation**
-   - Creates backup of current script (.backup extension)
+   - Creates backup with `.backup` extension
    - Replaces old script with new version
    - Cleans up temporary files
-   - Updates version display
+   - Validates successful installation
 
-5. **Safety**
+5. **Safety Features**
    - Always creates backup before updating
-   - Validates download before installation
    - Error handling with user-friendly messages
+   - Returns exit codes (0 = success, 1 = error)
 
 ## Configuration
 
 The updater is configured in `Program.cs`:
 
 ```csharp
-string scriptPath = "ESPAIMBOTWALLBANGROBLOX.lua";  // Default script name
-string repoOwner = "compiledkernel-idk";            // GitHub username
-string repoName = "universal-roblox-script";        // Repository name
+private static readonly string repoOwner = "compiledkernel-idk";
+private static readonly string repoName = "universal-roblox-script";
+private static string scriptPath = "kernelscript.luau";
+```
+
+## Version Format
+
+The updater expects version strings in your Lua script like:
+
+```lua
+local VERSION = "1.0.0"
+-- or
+local VERSION = "1.2.3"
+```
+
+GitHub releases should be tagged as:
+- `v1.0.0` or `1.0.0`
+- `v1.2.3` or `1.2.3`
+
+## Exit Codes
+
+- `0` - Success (no update needed or update completed)
+- `1` - Error occurred
+
+Example usage in batch scripts:
+```batch
+UpdateChecker.exe
+if %ERRORLEVEL% EQU 0 (
+    echo Update check successful
+) else (
+    echo Update check failed
+)
 ```
 
 ## Troubleshooting
@@ -120,78 +177,103 @@ string repoName = "universal-roblox-script";        // Repository name
 - Check that the VERSION in the Lua script matches the release tag
 - Verify GitHub releases are properly tagged (e.g., "v1.0.1")
 - Check internet connection
+- Run with `-v` flag for verbose output (if implemented)
 
 ### Update fails
 - Ensure you have write permissions to the script folder
 - Check that the script file isn't in use by another program
-- Review the log window for specific error messages
+- Review console output for specific error messages
+- Check the backup file was created (`.backup` extension)
 
 ### Executable won't run
 - Install .NET 6.0 Runtime from Microsoft
 - Or use the self-contained build which includes runtime
+- Check Windows Defender/antivirus isn't blocking
 
-### Can't find the executable after building
-- Check `UpdateChecker/bin/Release/net6.0-windows/publish/`
-- For self-contained: `bin/Release/net6.0-windows/win-x64/publish/`
+### Permission denied errors
+- Run as Administrator if needed
+- Check file/folder permissions
+- Ensure script file isn't read-only
+
+## Advanced Features
+
+### Automatic Backup
+Every update creates a backup file with `.backup` extension.
+
+Manual restore:
+```cmd
+copy kernelscript.luau.backup kernelscript.luau
+```
+
+### Batch Script Integration
+
+Create an auto-update launcher:
+
+```batch
+@echo off
+echo Checking for updates...
+UpdateChecker.exe
+if %ERRORLEVEL% EQU 0 (
+    echo Starting script...
+    start your_executor.exe kernelscript.luau
+)
+pause
+```
 
 ## File Structure
 
 ```
 UpdateChecker/
-├── UpdateChecker.csproj      # Project configuration
-├── Program.cs                # Application entry point
-├── UpdaterForm.cs            # Main GUI and update logic
-└── README.md                 # This file
+├── UpdateChecker.csproj    # Project configuration
+├── Program.cs              # Main console application
+├── build.bat               # Windows build script
+├── build.sh                # Linux/Mac build script
+└── README.md               # This file
 ```
 
-## Version Format
+## Building for Different Platforms
 
-The updater expects version strings in the Lua script like:
-```lua
-local VERSION = "1.0.0"
-```
-
-GitHub releases should be tagged as:
-- `v1.0.0` or `1.0.0`
-
-## Advanced Features
-
-### Automatic Backup
-Every update creates a backup file with `.backup` extension. You can manually restore by:
+### Windows x64 (default)
 ```bash
-copy ESPAIMBOTWALLBANGROBLOX.lua.backup ESPAIMBOTWALLBANGROBLOX.lua
+dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
 ```
 
-### Log Details
-The log window shows:
-- Timestamp for each operation
-- Current and latest version info
-- Download URL
-- File operations (backup, install)
-- Any errors encountered
+### Windows x86 (32-bit)
+```bash
+dotnet publish -c Release -r win-x86 --self-contained true -p:PublishSingleFile=true
+```
 
-### Progress Bar Breakdown
-- 0-20%: Checking for updates
-- 20-80%: Downloading (scales with download progress)
-- 80-100%: Installing and cleanup
+### Linux x64
+```bash
+dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true
+```
 
-## Building Distribution Package
+## Distribution Package
 
 To create a distribution-ready package:
 
 ```bash
-# Build self-contained single-file executable
-dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true
+# Build the executable
+cd UpdateChecker
+dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
 
-# Copy to distribution folder
+# Create distribution folder
 mkdir dist
-copy bin\Release\net6.0-windows\win-x64\publish\RobloxScriptUpdater.exe dist\
-
-# Include the main script
-copy ..\ESPAIMBOTWALLBANGROBLOX.lua dist\
+copy bin\Release\net6.0\win-x64\publish\UpdateChecker.exe dist\
+copy ..\kernelscript.luau dist\
 ```
 
-Users can then run `RobloxScriptUpdater.exe` from the `dist` folder.
+Users can then run `UpdateChecker.exe` from the `dist` folder.
+
+## Differences from GUI Version
+
+This console version:
+- No GUI window - runs in CMD/Terminal
+- Faster startup time
+- Smaller file size
+- Better for automation/scripting
+- Works over SSH/remote connections
+- Cleaner, more professional output
 
 ## License
 
