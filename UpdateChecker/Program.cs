@@ -23,10 +23,22 @@ namespace UpdateChecker
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("RobloxScriptUpdater/2.0");
 
-            // Parse arguments
+            // Parse arguments and resolve script path
             if (args.Length > 0)
             {
                 scriptPath = args[0];
+            }
+            else
+            {
+                // Look for script in the same directory as the exe
+                string exeDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? Directory.GetCurrentDirectory();
+                scriptPath = Path.Combine(exeDirectory, scriptPath);
+            }
+
+            // Make sure we have an absolute path
+            if (!Path.IsPathRooted(scriptPath))
+            {
+                scriptPath = Path.GetFullPath(scriptPath);
             }
 
             try
@@ -82,37 +94,53 @@ namespace UpdateChecker
             WriteColored("╔════════════════════════════════════════════════╗\n", ConsoleColor.Cyan);
             WriteColored("║   Universal Roblox Script - Update Checker   ║\n", ConsoleColor.Cyan);
             WriteColored("╚════════════════════════════════════════════════╝\n", ConsoleColor.Cyan);
+
+            string exeLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            WriteColored($"[INFO] UpdateChecker running from: {Path.GetDirectoryName(exeLocation)}\n", ConsoleColor.Gray);
         }
 
         private static void LoadCurrentVersion()
         {
             try
             {
-                if (File.Exists(scriptPath))
+                WriteColored($"[INFO] Looking for script at: {scriptPath}\n", ConsoleColor.Gray);
+
+                if (!File.Exists(scriptPath))
                 {
-                    string[] lines = File.ReadAllLines(scriptPath);
-                    foreach (string line in lines)
+                    WriteColored($"[ERROR] Script file not found!\n", ConsoleColor.Red);
+                    WriteColored($"[ERROR] Expected location: {scriptPath}\n", ConsoleColor.Red);
+                    WriteColored($"[INFO] Place the UpdateChecker.exe in the same folder as {Path.GetFileName(scriptPath)}\n", ConsoleColor.Yellow);
+                    WriteColored($"[INFO] Or run: UpdateChecker.exe \"path/to/{Path.GetFileName(scriptPath)}\"\n", ConsoleColor.Yellow);
+                    WriteColored($"[WARN] Using default version: {currentVersion}\n", ConsoleColor.Yellow);
+                    return;
+                }
+
+                WriteColored($"[INFO] Script found!\n", ConsoleColor.Green);
+                string[] lines = File.ReadAllLines(scriptPath);
+
+                foreach (string line in lines)
+                {
+                    if (line.Contains("VERSION") && line.Contains("=") && line.Contains("\""))
                     {
-                        if (line.Contains("VERSION") && line.Contains("="))
+                        // Extract version from line like: local VERSION = "1.0.0"
+                        int startIdx = line.IndexOf('"');
+                        int endIdx = line.LastIndexOf('"');
+                        if (startIdx >= 0 && endIdx > startIdx)
                         {
-                            // Extract version from line like: local VERSION = "1.0.0"
-                            int startIdx = line.IndexOf('"');
-                            int endIdx = line.LastIndexOf('"');
-                            if (startIdx >= 0 && endIdx > startIdx)
-                            {
-                                currentVersion = line.Substring(startIdx + 1, endIdx - startIdx - 1);
-                                WriteColored($"[INFO] Script found: {scriptPath}\n", ConsoleColor.Gray);
-                                WriteColored($"[INFO] Current version: {currentVersion}\n", ConsoleColor.Gray);
-                                return;
-                            }
+                            currentVersion = line.Substring(startIdx + 1, endIdx - startIdx - 1);
+                            WriteColored($"[INFO] Current version detected: {currentVersion}\n", ConsoleColor.Green);
+                            return;
                         }
                     }
                 }
-                WriteColored($"[WARN] No version info found in script, using default: {currentVersion}\n", ConsoleColor.Yellow);
+
+                WriteColored($"[WARN] No VERSION line found in script (looking for: local VERSION = \"x.x.x\")\n", ConsoleColor.Yellow);
+                WriteColored($"[WARN] Using default version: {currentVersion}\n", ConsoleColor.Yellow);
             }
             catch (Exception ex)
             {
-                WriteColored($"[WARN] Error loading version: {ex.Message}\n", ConsoleColor.Yellow);
+                WriteColored($"[ERROR] Error reading script file: {ex.Message}\n", ConsoleColor.Red);
+                WriteColored($"[WARN] Using default version: {currentVersion}\n", ConsoleColor.Yellow);
             }
         }
 
