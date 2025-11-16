@@ -1,16 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
-    <UseWindowsForms>true</UseWindowsForms>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <ApplicationIcon>icon.ico</ApplicationIcon>
-    <AssemblyName>RobloxScriptUpdater</AssemblyName>
-    <Version>1.0.0</Version>
+    <AssemblyName>UpdateChecker</AssemblyName>
+    <Version>2.0.0</Version>
     <Authors>Universal Roblox Script</Authors>
-    <Product>Roblox Script Auto Updater</Product>
-    <Description>Automatic update checker and installer for Universal Roblox Script</Description>
+    <Product>Roblox Script Update Checker (Console)</Product>
+    <Description>Command-line update checker and installer for Universal Roblox Script</Description>
   </PropertyGroup>
 
   <ItemGroup>

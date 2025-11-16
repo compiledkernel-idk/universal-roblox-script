@@ -1,7 +1,8 @@
 #!/bin/bash
 
 echo "============================================"
-echo " Roblox Script Auto Updater - Build Script"
+echo " Roblox Script Update Checker - Build Script"
+echo " (Console Version)"
 echo "============================================"
 echo ""
 
@@ -43,10 +44,10 @@ echo " BUILD SUCCESSFUL!"
 echo "============================================"
 echo ""
 echo "Executable location:"
-echo "bin/Release/net6.0-windows/win-x64/publish/RobloxScriptUpdater.exe"
+echo "bin/Release/net6.0/win-x64/publish/UpdateChecker.exe"
 echo ""
 echo "File size:"
-ls -lh bin/Release/net6.0-windows/win-x64/publish/RobloxScriptUpdater.exe | awk '{print $5, $9}'
+ls -lh bin/Release/net6.0/win-x64/publish/UpdateChecker.exe | awk '{print $5, $9}'
 echo ""
 echo "You can now distribute this executable!"
 echo ""
